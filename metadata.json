@@ -1,0 +1,6 @@
+{
+  "name": "Burger Joints",
+  "description": "Best in Town! Handcrafted smash burgers, grill sandwiches, hot crispy wings, shawarmas, platters, and deals at Crown King Mall, Ghauri Town, Islamabad. Delivery order: 0370 0065241.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Check if user is admin or staff based on verified bootstrap email or user document role
+    function isAdminOrStaff() {
+      return isSignedIn() && (
+        request.auth.token.email == '4529.muhammad@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'staff'])
+      );
+    }
+
+    // Test connection endpoint
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    // Restaurant Settings: Anyone can read; can seed if not existing; admin/staff manage
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create: if isAdminOrStaff() || !exists(/databases/$(database)/documents/settings/$(settingId));
+      allow update, delete: if isAdminOrStaff();
+    }
+
+    // Categories: Anyone can read; can seed if not existing; admin/staff manage
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create: if isAdminOrStaff() || !exists(/databases/$(database)/documents/categories/$(categoryId));
+      allow update, delete: if isAdminOrStaff();
+    }
+
+    // Products: Anyone can read menu; can seed if not existing; admin/staff manage
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdminOrStaff() || !exists(/databases/$(database)/documents/products/$(productId));
+      allow update, delete: if isAdminOrStaff();
+    }
+
+    // User Profiles: Private PII isolation
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdminOrStaff();
+      allow create: if isOwner(userId) || isAdminOrStaff();
+      allow update: if isOwner(userId) || isAdminOrStaff();
+      allow delete: if isAdminOrStaff();
+    }
+
+    // Orders:
+    // Anyone can create an order (guests or signed-in users)
+    // Individual order retrieval is allowed (for customer confirmation & tracking)
+    // Listing orders enforces role boundaries: staff/admin view all, signed-in users view only their own
+    match /orders/{orderId} {
+      allow create: if true;
+      allow get: if true;
+      allow list: if isAdminOrStaff() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update: if isAdminOrStaff() || (isSignedIn() && resource.data.userId == request.auth.uid && request.resource.data.status == 'cancelled');
+      allow delete: if isAdminOrStaff();
+    }
+  }
+}
+

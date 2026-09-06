@@ -1,0 +1,164 @@
+{
+  "entities": {
+    "RestaurantSettings": {
+      "title": "Restaurant Settings",
+      "description": "Global settings for the fast-food restaurant including operational hours, contact, and branding",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "tagline": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "openingHours": { "type": "string" },
+        "deliveryFee": { "type": "number" },
+        "minDeliveryOrder": { "type": "number" },
+        "estimatedDeliveryTime": { "type": "string" },
+        "estimatedPickupTime": { "type": "string" },
+        "isOpen": { "type": "boolean" },
+        "acceptedPaymentMethods": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "adminEmails": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "address", "isOpen"]
+    },
+    "Category": {
+      "title": "Menu Category",
+      "description": "Food categories such as Burgers, Fries, Drinks, Combos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "icon": { "type": "string" },
+        "sortOrder": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["id", "name", "slug", "isActive"]
+    },
+    "Product": {
+      "title": "Menu Product",
+      "description": "Individual fast food dish or drink",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "categoryId": { "type": "string" },
+        "image": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "badge": { "type": "string" },
+        "isAvailable": { "type": "boolean" },
+        "isPopular": { "type": "boolean" },
+        "calories": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "price": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "price", "categoryId", "isAvailable"]
+    },
+    "Order": {
+      "title": "Customer Order",
+      "description": "Placed food order for pickup or delivery",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhone": { "type": "string" },
+        "orderType": { "type": "string", "enum": ["delivery", "pickup"] },
+        "deliveryAddress": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "price": { "type": "number" },
+              "quantity": { "type": "number" },
+              "selectedOptions": { "type": "object" },
+              "subtotal": { "type": "number" }
+            }
+          }
+        },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "cash_on_delivery"] },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "preparing", "ready", "out_for_delivery", "completed", "cancelled"] },
+        "specialInstructions": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderType", "items", "total", "status", "paymentMethod"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Customer profile details and default preferences",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "defaultAddress": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "staff", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email"]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/RestaurantSettings" },
+      "description": "Global restaurant settings, operational hours, branding, and contact"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Menu food categories"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Menu products, ingredients, prices, and options"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer food orders for delivery or pickup"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Customer and staff user accounts"
+    }
+  }
+}
